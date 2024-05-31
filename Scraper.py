@@ -1,10 +1,28 @@
 import requests
 from bs4 import BeautifulSoup
 
-url = "https://books.toscrape.com/"
+
+# Pour un Livre
+url = "https://books.toscrape.com/catalogue/a-light-in-the-attic_1000/index.html"
 response = requests.get(url)
 page=response.content
-#html_code = response.text 
 soup = BeautifulSoup(page, "html.parser")
+infos =[]
+trs = soup.find_all("tr")
+for tr in trs:
+    td = tr.find("td")
+    infos.append(td)
+print(infos)
 
-categories = soup.find_all("a", class_="nav-list")
+"""
+product_page_url
+universal_ product_code (upc)
+title
+price_including_tax
+price_excluding_tax
+number_available
+product_description
+category
+review_rating
+image_url
+"""
