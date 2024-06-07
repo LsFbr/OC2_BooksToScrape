@@ -81,14 +81,22 @@ def extract_book(url):
 
 
     
-
-    print(infos_to_csv)
-
-
-extract_book(url)
+    return infos_to_csv
+    #print(infos_to_csv)
 
 
+infos_to_csv = extract_book(url)
 
+
+def create_csv(infos_to_csv):
+    headers = ["product_page_url", "universal_ product_code", "title", "price_including_tax", "price_excluding_tax", "number_available", "product_description", "category", "review_rating", "image_url"]
+    
+    with open("datas_book.csv", "w", newline="") as csv_file:
+        writer = csv.DictWriter(csv_file, fieldnames=headers)
+        writer.writeheader()
+        writer.writerow(infos_to_csv)
+        
+create_csv(infos_to_csv)
 
 
 
@@ -101,6 +109,6 @@ extract_book(url)
 - 5 number_available
 - product_description
 - category
-review_rating
--image_url
+- review_rating
+- image_url
 """
