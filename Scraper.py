@@ -10,9 +10,12 @@ url = "https://books.toscrape.com/catalogue/a-light-in-the-attic_1000/index.html
 
 def extract_book(url):
     infos_to_csv ={}
-    
+
+# add product url to info_to_csv dictionary   
     infos_to_csv["product_page_url"] = url
 
+
+#parse the web page
     response = requests.get(url)
     soup = BeautifulSoup(response.text, "html.parser")
 
@@ -25,7 +28,7 @@ def extract_book(url):
     for tr in trs:
         td = tr.find("td")
         product_informations.append(td.text)
-# add the desired product informations to infos_to_csv dictionnary
+# add the desired product informations to infos_to_csv dictionary
     infos_to_csv["universal_ product_code"] = product_informations[0]
     infos_to_csv["price_excluding_tax"] = product_informations[2]
     infos_to_csv["price_including_tax"] = product_informations[3]
@@ -42,9 +45,18 @@ def extract_book(url):
 # extract title
     title = soup.find("li", {"class": "active"})
     breadcrumb.append(title.text)
-# add the title and category to infos_to_csv dictionnary
+# add the title and category to infos_to_csv dictionary
     infos_to_csv["title"] = breadcrumb[-1]
     infos_to_csv["category"] = breadcrumb[-2]
+
+
+
+# extract image's url
+    div = soup.find("div", {"class": "item active"})
+    image = div.find("img")
+    image_url = image.get("src")
+# add the image's url to infos_to_csv dictionary
+    infos_to_csv["image_url"] = image_url
     
 
 
@@ -67,5 +79,5 @@ extract_book(url)
 product_description
 - category
 review_rating
-image_url
+-image_url
 """
