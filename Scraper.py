@@ -38,8 +38,7 @@ def extract_book(url):
 # extract category
     breadcrumb = []
 
-    ul = soup.find("ul", {"class": "breadcrumb"})
-    links = ul.find_all("a")
+    links = soup.find("ul", {"class": "breadcrumb"}).find_all("a")
     for link in links:
         breadcrumb.append(link.text)
 # extract title
@@ -52,10 +51,9 @@ def extract_book(url):
 
 
 # extract image's url
-    div = soup.find("div", {"class": "item active"})
-    image = div.find("img")
-    image_url = image.get("src")
-# add the image's url to infos_to_csv dictionary
+    div = soup.find("div", {"class": "item active"}).find("img")
+    image_url = div.get("src")
+    
     infos_to_csv["image_url"] = image_url
 
 
@@ -65,8 +63,27 @@ def extract_book(url):
     infos_to_csv["product_description"] = product_description.text
     
 
+# extract the review rating
+    str_to_int = {
+        "One":1 ,
+        "Two":2,
+        "Three":3,
+        "Four":4,
+        "Five":5
+    }
+    rating_class = soup.find("p",{"class": "star-rating"}).attrs
+    rating_class = rating_class["class"]
+    rating_class = rating_class[1]
+    review_rating = str_to_int[rating_class]
+    
+    infos_to_csv["review_rating"] = review_rating
+    print(review_rating)
+
+
+    
 
     print(infos_to_csv)
+
 
 extract_book(url)
 
