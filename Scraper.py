@@ -57,6 +57,18 @@ def extract_book(url):
     image_url = image.get("src")
 # add the image's url to infos_to_csv dictionary
     infos_to_csv["image_url"] = image_url
+
+
+# extract the product description
+    p_list = []
+    article = soup.find("article", {"class": "product_page"})
+    ps = article.find_all("p")
+    for p in ps:
+        p_list.append(p.text)
+    
+    product_description = p_list[3]
+    
+    infos_to_csv["product_description"] = product_description
     
 
 
