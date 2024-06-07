@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 import csv
 
 
-# Pour un Livre
+# For one book
 # Load
 
 url = "https://books.toscrape.com/catalogue/a-light-in-the-attic_1000/index.html"
@@ -15,7 +15,7 @@ def extract_book(url):
     infos_to_csv["product_page_url"] = url
 
 
-#parse the web page
+# parse the web page
     response = requests.get(url)
     soup = BeautifulSoup(response.text, "html.parser")
 
@@ -59,16 +59,10 @@ def extract_book(url):
     infos_to_csv["image_url"] = image_url
 
 
-# extract the product description
-    p_list = []
-    article = soup.find("article", {"class": "product_page"})
-    ps = article.find_all("p")
-    for p in ps:
-        p_list.append(p.text)
-    
-    product_description = p_list[3]
-    
-    infos_to_csv["product_description"] = product_description
+# extract the product description   
+    product_description = soup.find("article", {"class": "product_page"}).find("p", recursive=False)
+        
+    infos_to_csv["product_description"] = product_description.text
     
 
 
@@ -88,7 +82,7 @@ extract_book(url)
 - 3 price_including_tax
 - 2 price_excluding_tax
 - 5 number_available
-product_description
+- product_description
 - category
 review_rating
 -image_url
