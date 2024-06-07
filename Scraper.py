@@ -26,6 +26,12 @@ def extract_book(url):
         td = tr.find("td")
         product_information.append(td.text)
 
+    infos_to_csv["universal_ product_code"] = product_information[0]
+    infos_to_csv["price_excluding_tax"] = product_information[2]
+    infos_to_csv["price_including_tax"] = product_information[3]
+    infos_to_csv["number_available"] = product_information[5]
+    
+
     # find title and category
     nav = []
 
