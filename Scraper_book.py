@@ -59,22 +59,19 @@ def extract_review_rating(soup):
     review_rating = str_to_int[rating_class]
 
     return review_rating
-    
-    
-    
 
     
     
     
-def extract_book(url):
+def extract_book(url_book):
     infos_to_csv ={}
 
     # parse the web page
-    response = requests.get(url)
+    response = requests.get(url_book)
     soup = BeautifulSoup(response.text, "html.parser")
 
     # add product url to info_to_csv dictionary   
-    infos_to_csv["product_page_url"] = url
+    infos_to_csv["product_page_url"] = url_book
 
     extract_product_informations(soup)
     infos_to_csv["universal_ product_code"] = extract_product_informations(soup)[0]
@@ -107,23 +104,14 @@ def create_csv(infos_to_csv):
         writer.writeheader()
         writer.writerow(infos_to_csv)
 
-url = "https://books.toscrape.com/catalogue/a-light-in-the-attic_1000/index.html"
 
-extract_book(url)
-infos_to_csv = extract_book(url)        
-create_csv(infos_to_csv)
+url_book = input("Please enter a product's url : ")
 
+def main():
+    extract_book(url_book)
+    infos_to_csv = extract_book(url_book)        
+    create_csv(infos_to_csv)
 
+if __name__ == "__main__":
+    main()
 
-"""
-- product_page_url                
-- 0 universal_ product_code (upc)
-- title
-- 3 price_including_tax
-- 2 price_excluding_tax
-- 5 number_available
-- product_description
-- category
-- review_rating
-- image_url
-"""
