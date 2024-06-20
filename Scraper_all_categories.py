@@ -1,7 +1,3 @@
-import requests
-from bs4 import BeautifulSoup
-import csv
-import os
 from utils import *
 from Scraper_category import main_scraper_category
 

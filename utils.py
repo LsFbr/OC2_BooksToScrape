@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import csv
 import os
+import re
 
 def extract_product_informations(soup):
 
@@ -33,8 +34,29 @@ def extract_title(soup):
 def extract_image_url(soup):
     div = soup.find("div", {"class": "item active"}).find("img")
     image_url = div.get("src")
+    image_url = image_url.split("/", 2)[2]
+    image_url = "https://books.toscrape.com/" + image_url
     
     return image_url   
+
+def sanitize_filename(filename, max_length=50):
+    sanitized = re.sub(r'[\\/*?:"<>|]', "_", filename)
+    return sanitized[:max_length]
+
+def download_image_file(soup):
+
+    save_path = "books_images"
+    image_name = sanitize_filename(extract_title(soup)) + "_thumbnail.jpg"
+    image_url = extract_image_url(soup)
+    
+    response = requests.get(image_url)
+    response.encoding = "utf-8"
+
+    if response.status_code == 200:
+        os.makedirs(save_path, exist_ok = True)
+        file_path = os.path.join(save_path, image_name)
+        with open(file_path, "wb") as file:
+            file.write(response.content)
 
 def extract_product_description(soup):  
     try: 
@@ -59,8 +81,6 @@ def extract_review_rating(soup):
     review_rating = str_to_int[rating_class]
 
     return review_rating
-
-    
     
 def extract_page_urls_books(soup): # Extracts all books's urls from a category page
     page_urls_books = []
@@ -78,6 +98,7 @@ def extract_book(url_book): # Extracts datas from a book page
 
     # parse the web page
     response = requests.get(url_book)
+    response.encoding = "utf-8"
     soup = BeautifulSoup(response.text, "html.parser")
 
     # add product url to info_to_csv dictionary   
@@ -103,6 +124,8 @@ def extract_book(url_book): # Extracts datas from a book page
 
     extract_review_rating(soup)
     infos_to_csv["review_rating"] = extract_review_rating(soup)
+
+    download_image_file(soup)
     
     return infos_to_csv
 
@@ -117,6 +140,7 @@ def extract_category_urls_books(url_category): # Extracts all books urls in a ca
         full_url = base_url + page
 
         response = requests.get(full_url)
+        response.encoding = "utf-8"
         soup = BeautifulSoup(response.text, "html.parser")
        
 
@@ -165,6 +189,7 @@ def extract_urls_categories(url_site_index):
     
 
     response = requests.get(url_site_index)
+    response.encoding = "utf-8"
     soup = BeautifulSoup(response.text, "html.parser")
 
     titles_list = extract_titles(soup)
@@ -187,4 +212,6 @@ def create_csv(infos_to_csv): # Creates csv and/or add new line in it
             writer.writerow(infos_to_csv)
 
 
+
+            
     
