@@ -1,68 +1,10 @@
 import requests
 from bs4 import BeautifulSoup
 import csv
-
+from utils import *
 
 # For one book
-
-
-
-def extract_product_informations(soup):
-
-    product_informations = []
-
-    trs = soup.find_all("tr")
-
-    for tr in trs:
-        td = tr.find("td")
-        product_informations.append(td.text)
-    
-    
-    return product_informations
-
-def extract_category(soup):
-    breadcrumb = []
-
-    links = soup.find("ul", {"class": "breadcrumb"}).find_all("a")
-    for link in links:
-        breadcrumb.append(link.text)
-    
-    return breadcrumb    
-
-def extract_title(soup):
-    title = soup.find("li", {"class": "active"})
-    
-    return title.text
-    
-def extract_image_url(soup):
-    div = soup.find("div", {"class": "item active"}).find("img")
-    image_url = div.get("src")
-    
-    return image_url   
-
-def extract_product_description(soup):   
-    product_description = soup.find("article", {"class": "product_page"}).find("p", recursive=False)
-    
-    return product_description.text
-    
-def extract_review_rating(soup):
-    str_to_int = {
-        "One":1 ,
-        "Two":2,
-        "Three":3,
-        "Four":4,
-        "Five":5
-    }
-    rating_class = soup.find("p",{"class": "star-rating"}).attrs
-    rating_class = rating_class["class"]
-    rating_class = rating_class[1]
-    review_rating = str_to_int[rating_class]
-
-    return review_rating
-
-    
-    
-    
+  
 def extract_book(url_book):
     infos_to_csv ={}
 
@@ -104,14 +46,13 @@ def create_csv(infos_to_csv):
         writer.writeheader()
         writer.writerow(infos_to_csv)
 
-
 url_book = input("Please enter a product's url : ")
 
-def main():
+def main_scraper_book():
     extract_book(url_book)
     infos_to_csv = extract_book(url_book)        
     create_csv(infos_to_csv)
 
 if __name__ == "__main__":
-    main()
+    main_scraper_book()
 
