@@ -1,9 +1,12 @@
 # Books To Scrape - Scraper
 
-Pour pouvoir utliser les scripts de scraping, commencez par configurer votre environnement.
+Le but du projet est de récupérer les informations produit du site books.toscrape.com afin d'effectuer un suivi des prix des produits souhaités.
+il se compose de trois scripts qui permettent de scraper les informations d'un produit, de tout les produits d'une catégorie ou de tout les produits du site, et de charger ces données extraites dans un fichier data_books.csv pour les données textuelles, et dans un dossier books_images pour les images en jpg
 
+Pour pouvoir utliser les scripts de scraping, commencez par configurer votre environnement.
 En premier lieu assurez vous que python 3 et le gestionnaire de paquets pip sont bien installés sur votre système.
 
+## Créer un environnement virtuel
 Créez un environnement virtuel afin que toutes les commandes python et pip que vous executerez depuis le repertoire BooksToScrape_Project soient isolées dasn cet environnement.
 
     Pour créer un environnement virtuel en Python, suivez ces étapes :
@@ -27,7 +30,7 @@ Créez un environnement virtuel afin que toutes les commandes python et pip que 
 
         Après avoir activé l'environnement virtuel, votre terminal affichera le nom de l'environnement virtuel, indiquant que toutes les commandes python et pip que vous exécutez seront maintenant isolées dans cet environnement.
 
-Installez les dépendences nécessaires au fonctionnement des scripts. 
+## Installer les dépendences nécessaires au fonctionnement des scripts. 
 
     Ces modules sont listés dans le fichier requirements.txt. Pour les installer, après avoir activé votre environnement virtuel, suivez ces étapes :
 
@@ -41,14 +44,15 @@ Installez les dépendences nécessaires au fonctionnement des scripts.
             
     Cette commande va lire chaque ligne du fichier requirements.txt et installer les modules Python spécifiés avec les versions indiquées, en utilisant pip, le gestionnaire de paquets pour Python.
 
+## Executer les scripts.
 
 Une fois ces prérequis effectués vous pouvez lancer les scripts. L'execution de chaque script aura pour effet la création d'un fichier csv nommé data_books qui recueillera les donnés d'un ou plusieurs produits selon le script, et d'un dossier books_images qui recueillera spécifiquement les images de chaque produit.
 
-        scraper_booksToScrape_oneBook.py permet de récuperer les données d'un produit.
+        one_book_scraper.py permet de récuperer les données d'un produit.
 
-        scraper_booksToScrape_oneCategory.py permet de récupérer les données d'une catégorie entière
+        one_category_scraper.py permet de récupérer les données d'une catégorie entière
 
-        scraper_booksToScrape_allSite.py permet de récupérer les données de tout les produits du site
+        all_site_scraper.py permet de récupérer les données de tout les produits du site
         
     Pour executer un script, assurez vous d'être dans le répertoire du projet (BooksToScrape_Project), utilisez la commande cd dans votre terminal pour naviguer vers celui-ci si nécessaire.
     Ensuite utilisez la commande suivante en remplacant nom_du_script.py par le nom du script souhaité :  

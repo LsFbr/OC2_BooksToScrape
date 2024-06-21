@@ -40,7 +40,7 @@ def extract_image_url(soup):
     return image_url   
 
 def sanitize_filename(filename, max_length=50):
-    sanitized = re.sub(r'[\\/*?:"<>|]', "_", filename)
+    sanitized = re.sub(r'[\\/*?:"<>|\']', "_", filename)
     return sanitized[:max_length]
 
 def download_image_file(soup):
@@ -198,7 +198,7 @@ def extract_urls_categories(url_site_index):
     
     return urls_categories
 
-def create_csv(infos_to_csv): # Creates csv and/or add new line in it
+def create_csv(infos_to_csv): 
     headers = ["product_page_url", "universal_ product_code", "title", "price_including_tax", "price_excluding_tax", "number_available", "product_description", "category", "review_rating", "image_url"]
     file_exists = os.path.isfile("datas_books.csv") 
     if not file_exists: # Checks if csv file already exists. If not :
@@ -211,7 +211,7 @@ def create_csv(infos_to_csv): # Creates csv and/or add new line in it
             writer = csv.DictWriter(csv_file, fieldnames=headers)        
             writer.writerow(infos_to_csv)
 
-def scraper_booksToScrape_oneCategory(url_category):
+def one_category_scraper(url_category):
     urls_books = extract_category_urls_books(url_category)
     for url_book in urls_books:
         info_to_csv = extract_book(url_book)
@@ -219,5 +219,21 @@ def scraper_booksToScrape_oneCategory(url_category):
         create_csv(info_to_csv)
 
 
-            
+
+# à tester
+
+def build_one_category_url(category_title):
+    all_category_list = extract_titles()
+    base_url = "https://books.toscrape.com/catalogue/category/books/"
+    url_end = "/index.html"
+    index = 2
+    category_index = 0
+
+    for i in range(0, len(all_category_list)):
+        if all_category_list[i] == category_title.strip():
+            category_index = i + index
+
+    category_url = base_url + category_title + "_" + category_index + url_end
+
+    return category_url
     

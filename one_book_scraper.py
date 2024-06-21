@@ -1,4 +1,4 @@
-from utils import *
+from utils import extract_book, create_csv
 # urls exemples :
 # url_book = "https://books.toscrape.com/catalogue/a-light-in-the-attic_1000/index.html"
 # url_book = "https://books.toscrape.com/catalogue/neither-here-nor-there-travels-in-europe_198/index.html"

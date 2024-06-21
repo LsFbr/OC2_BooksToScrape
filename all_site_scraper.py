@@ -1,4 +1,4 @@
-from utils import *
+from utils import extract_urls_categories,  one_category_scraper
 
 
 def main_scraper_booksToScrape_allSite_():
@@ -6,7 +6,7 @@ def main_scraper_booksToScrape_allSite_():
     urls_categories = extract_urls_categories(url_site_index)
 
     for url_category in urls_categories:
-        scraper_booksToScrape_oneCategory(url_category)
+        one_category_scraper(url_category)
 
 
 if __name__ == "__main__":
