@@ -211,6 +211,12 @@ def create_csv(infos_to_csv): # Creates csv and/or add new line in it
             writer = csv.DictWriter(csv_file, fieldnames=headers)        
             writer.writerow(infos_to_csv)
 
+def scraper_booksToScrape_oneCategory(url_category):
+    urls_books = extract_category_urls_books(url_category)
+    for url_book in urls_books:
+        info_to_csv = extract_book(url_book)
+        print(info_to_csv["title"])
+        create_csv(info_to_csv)
 
 
             
