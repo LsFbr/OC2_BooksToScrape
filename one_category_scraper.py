@@ -1,10 +1,9 @@
-from utils import *
-# url exemple :
-# url_category = "https://books.toscrape.com/catalogue/category/books/mystery_3/index.html"  
-
-url_category = input("Please enter a category url : ")
+from utils import build_one_category_url, extract_category_urls_books, extract_category_urls_books, create_csv, extract_book
+category_input = input("Please enter a category name : ")
 
 def main_scraper_booksToScrape_oneCategory():
+    url_category = build_one_category_url(category_input)
+    
     urls_books = extract_category_urls_books(url_category)
     for url_book in urls_books:
         info_to_csv = extract_book(url_book)

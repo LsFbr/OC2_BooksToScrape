@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 import csv
 import os
 import re
+import json
 
 def extract_product_informations(soup):
 
@@ -40,7 +41,7 @@ def extract_image_url(soup):
     return image_url   
 
 def sanitize_filename(filename, max_length=50):
-    sanitized = re.sub(r'[\\/*?:"<>|\']', "_", filename)
+    sanitized = re.sub(r'[\\/*?:"<>|\'’]', "_", filename)
     return sanitized[:max_length]
 
 def download_image_file(soup):
@@ -160,24 +161,24 @@ def extract_category_urls_books(url_category): # Extracts all books urls in a ca
     
     return urls_books 
 
-def extract_titles(soup):
-    titles_list = []
+def extract_category_titles(soup):
+    category_titles_list = []
     ul = soup.find("ul", {"class": "nav"}).find("ul")
     titles = ul.find_all("a")
 
     for title in titles:
-        titles_list.append(title.text.strip())
+        category_titles_list.append(title.text.strip())
 
-    return titles_list
+    return category_titles_list
 
-def build_urls_categories(titles_list):
+def build_urls_categories(category_titles_list):
     base_url = "https://books.toscrape.com/catalogue/category/books/"
     url_end = "/index.html"
 
     urls_categories = []
     index = 2
 
-    for title in titles_list:
+    for title in category_titles_list:
         title = title.replace(" ","-").lower()
         url_category = base_url + title + "_" + str(index) + url_end
         urls_categories.append(url_category)
@@ -192,7 +193,7 @@ def extract_urls_categories(url_site_index):
     response.encoding = "utf-8"
     soup = BeautifulSoup(response.text, "html.parser")
 
-    titles_list = extract_titles(soup)
+    titles_list = extract_category_titles(soup)
 
     urls_categories = build_urls_categories(titles_list)
     
@@ -218,22 +219,131 @@ def one_category_scraper(url_category):
         print(info_to_csv["title"])
         create_csv(info_to_csv)
 
-
-
-# à tester
-
 def build_one_category_url(category_title):
-    all_category_list = extract_titles()
+    url_site_index = "https://books.toscrape.com/index.html"
+    response = requests.get(url_site_index)
+    response.encoding = "utf-8"
+    soup = BeautifulSoup(response.text, "html.parser")
+
+    category_titles_list = extract_category_titles(soup)
+    
     base_url = "https://books.toscrape.com/catalogue/category/books/"
     url_end = "/index.html"
     index = 2
     category_index = 0
 
-    for i in range(0, len(all_category_list)):
-        if all_category_list[i] == category_title.strip():
+    for i in range(0, len(category_titles_list)):
+        if category_titles_list[i] == category_title.strip():
             category_index = i + index
-
-    category_url = base_url + category_title + "_" + category_index + url_end
-
-    return category_url
     
+    #if category_index == 0 :
+     #   print("Aucune correspondance trouvée.")
+    
+    url_category = base_url + category_title.replace(" ","-").lower() + "_" + str(category_index) + url_end
+    
+    return url_category
+
+def extract_page1_books_titles_urls(soup):
+
+    page_books_titles_urls = {}
+
+    lis = soup.find_all("article", {"class":"product_pod"})
+    
+    for li in lis:
+        link = li.find("h3").find("a")
+        title= link.get("title")
+        href = "https://books.toscrape.com/" + link.get("href")
+        page_books_titles_urls[title] = href
+    
+    return page_books_titles_urls
+
+def extract_page_books_titles_urls(soup):
+
+    page_books_titles_urls = {}
+
+    lis = soup.find_all("article", {"class":"product_pod"})
+    
+    for li in lis:
+        link = li.find("h3").find("a")
+        title= link.get("title")
+        href = "https://books.toscrape.com/catalogue/" + link.get("href")
+        page_books_titles_urls[title] = href
+    
+    return page_books_titles_urls
+    
+def extract_all_site_books_titles_url():
+    try:
+        with open('books_titles_urls.json', 'r') as file:
+            books_titles_urls = json.load(file)
+    except FileNotFoundError:
+        books_titles_urls = {} 
+    #books_titles_urls = {}
+
+    base_url = "https://books.toscrape.com/"
+    page = "index.html"
+    page_number = 1
+
+    while True:
+        full_url = base_url + page
+
+        response = requests.get(full_url)
+        response.encoding = "utf-8"
+        soup = BeautifulSoup(response.text, "html.parser")
+
+        print (page_number)
+
+        if page_number < 2: 
+            page_books_titles_urls = extract_page1_books_titles_urls(soup)
+        else : 
+            page_books_titles_urls = extract_page_books_titles_urls(soup)
+
+        books_titles_urls.update(page_books_titles_urls)
+
+        #for title, href in page_books_titles_urls.items():
+         #   books_titles_urls[title] = href
+        
+
+        # check for other pages 
+        next_page = soup.find("li", {"class" : "next"})
+        if next_page:
+            page_number += 1 
+            page = f"/catalogue/page-{page_number}.html"
+        else: 
+            break # no more pages 
+
+    with open('books_titles_urls.json', 'w') as file:
+        json.dump(books_titles_urls, file)
+
+    return books_titles_urls 
+
+def find_url_book(title_input):
+    try:
+        with open('books_titles_urls.json', 'r') as file:
+            books_titles_urls = json.load(file)
+    except FileNotFoundError:
+        print("Le fichier books_titles_urls.json n'existe pas.")
+        print("Création du fichier books_titles_urls.json...")
+        books_titles_urls = extract_all_site_books_titles_url()
+    
+    def search_title_match(books_titles_urls):
+        for title, href in books_titles_urls.items():
+            if title == title_input:
+                return href
+        return None
+            
+    url_book = search_title_match(books_titles_urls)
+    if url_book:
+        return url_book
+    
+    print("Aucune correspondance trouvée, mise à jour des données...")
+    books_titles_urls = extract_all_site_books_titles_url()  # Mise à jour
+    url_book = search_title_match(books_titles_urls)
+
+    if url_book:
+        return url_book
+    else:
+        print("Aucune correspondance trouvée.")
+
+
+
+
