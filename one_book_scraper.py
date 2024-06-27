@@ -1,4 +1,4 @@
-from utils import extract_book, create_csv, find_url_book
+from utils import extract_book, create_csv_book, find_url_book
 # urls exemples :
 # url_book = "https://books.toscrape.com/catalogue/a-light-in-the-attic_1000/index.html"
 # url_book = "https://books.toscrape.com/catalogue/neither-here-nor-there-travels-in-europe_198/index.html"
@@ -10,8 +10,9 @@ def main_one_book_scraper():
     
     url_book = find_url_book(title_input)
     print(url_book)
-    infos_to_csv = extract_book(url_book)        
-    create_csv(infos_to_csv)
+    infos_to_csv = extract_book(url_book)
+    print(infos_to_csv)        
+    create_csv_book(infos_to_csv)
 
 if __name__ == "__main__":
     main_one_book_scraper()

@@ -13,8 +13,7 @@ def extract_product_informations(soup):
 
     for tr in trs:
         td = tr.find("td")
-        product_informations.append(td.text)
-    
+        product_informations.append(td.text)    
     
     return product_informations
 
@@ -46,7 +45,7 @@ def sanitize_filename(filename, max_length=50):
 
 def download_image_file(soup):
 
-    save_path = "books_images"
+    save_path = os.path.join("scraped_datas", "books_images")
     image_name = sanitize_filename(extract_title(soup)) + "_thumbnail.jpg"
     image_url = extract_image_url(soup)
     
@@ -83,7 +82,7 @@ def extract_review_rating(soup):
 
     return review_rating
     
-def extract_page_urls_books(soup): # Extracts all books's urls from a category page
+def extract_page_urls_books(soup): 
     page_urls_books = []
     lis = soup.find_all("li", {"class": "col-xs-6"})
     
@@ -94,43 +93,39 @@ def extract_page_urls_books(soup): # Extracts all books's urls from a category p
         page_urls_books.append(url_book)
     return page_urls_books
 
-def extract_book(url_book): # Extracts datas from a book page
-    infos_to_csv ={}
-
-    # parse the web page
+def extract_book(url_book): 
     response = requests.get(url_book)
     response.encoding = "utf-8"
     soup = BeautifulSoup(response.text, "html.parser")
+   
+    # Appel unique pour chaque fonction d'extraction
+    product_infos = extract_product_informations(soup)
+    category = extract_category(soup)
+    title = extract_title(soup)
+    image_url = extract_image_url(soup)
+    product_description = extract_product_description(soup)
+    review_rating = extract_review_rating(soup)
+    
+    # Initialisation directe du dictionnaire avec toutes les informations
+    infos_to_csv = {
+        "product_page_url": url_book,
+        "universal_product_code": product_infos[0],
+        "price_excluding_tax": product_infos[2],
+        "price_including_tax": product_infos[3],
+        "number_available": product_infos[5],
+        "category": category[-1],
+        "title": title,
+        "image_url": image_url,
+        "product_description": product_description,
+        "review_rating": review_rating
+    }
 
-    # add product url to info_to_csv dictionary   
-    infos_to_csv["product_page_url"] = url_book
-
-    extract_product_informations(soup)
-    infos_to_csv["universal_ product_code"] = extract_product_informations(soup)[0]
-    infos_to_csv["price_excluding_tax"] = extract_product_informations(soup)[2]
-    infos_to_csv["price_including_tax"] = extract_product_informations(soup)[3]
-    infos_to_csv["number_available"] = extract_product_informations(soup)[5]
-
-    extract_category(soup)
-    infos_to_csv["category"] = extract_category(soup)[-1]
-
-    extract_title(soup)
-    infos_to_csv["title"] = extract_title(soup)
-
-    extract_image_url(soup)
-    infos_to_csv["image_url"] = extract_image_url(soup)
-
-    extract_product_description(soup)
-    infos_to_csv["product_description"] = extract_product_description(soup)
-
-    extract_review_rating(soup)
-    infos_to_csv["review_rating"] = extract_review_rating(soup)
-
+    # Téléchargement de l'image du livre
     download_image_file(soup)
     
     return infos_to_csv
 
-def extract_category_urls_books(url_category): # Extracts all books urls in a category
+def extract_category_urls_books(url_category): 
     urls_books = []
 
     base_url = url_category.rsplit("/", 1)[0] + "/"
@@ -142,22 +137,19 @@ def extract_category_urls_books(url_category): # Extracts all books urls in a ca
 
         response = requests.get(full_url)
         response.encoding = "utf-8"
-        soup = BeautifulSoup(response.text, "html.parser")
-       
+        soup = BeautifulSoup(response.text, "html.parser")     
 
         page_urls_books = extract_page_urls_books(soup)
 
         for i in page_urls_books:
             urls_books.append(i)
-        
-
-        # check for other pages 
+         
         next_page = soup.find("li", {"class" : "next"})
         if next_page:
             page_number += 1 
             page = f"page-{page_number}.html"
         else: 
-            break # no more pages 
+            break 
     
     return urls_books 
 
@@ -188,7 +180,6 @@ def build_urls_categories(category_titles_list):
 
 def extract_urls_categories(url_site_index):
     
-
     response = requests.get(url_site_index)
     response.encoding = "utf-8"
     soup = BeautifulSoup(response.text, "html.parser")
@@ -202,7 +193,7 @@ def extract_urls_categories(url_site_index):
 def create_csv(infos_to_csv): 
     headers = ["product_page_url", "universal_ product_code", "title", "price_including_tax", "price_excluding_tax", "number_available", "product_description", "category", "review_rating", "image_url"]
     file_exists = os.path.isfile("datas_books.csv") 
-    if not file_exists: # Checks if csv file already exists. If not :
+    if not file_exists: 
         with open("datas_books.csv", "w", newline="", encoding="utf-8") as csv_file:
             writer = csv.DictWriter(csv_file, fieldnames=headers)        
             writer.writeheader()
@@ -212,12 +203,74 @@ def create_csv(infos_to_csv):
             writer = csv.DictWriter(csv_file, fieldnames=headers)        
             writer.writerow(infos_to_csv)
 
+def create_csv_book(infos_to_csv):
+    directory = "scraped_datas"
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+    title_cleaned = re.sub(r'[\\/*?:"<>|]', "", infos_to_csv["title"])
+    filename = os.path.join(directory, f"data_book_{title_cleaned}.csv")
+
+    headers = ["product_page_url", "universal_ product_code", "title", "price_including_tax", "price_excluding_tax", "number_available", "product_description", "category", "review_rating", "image_url"]
+    temp_data = []
+    entry_exists = False
+   
+    if os.path.isfile(filename):
+        with open(filename, "r", newline="", encoding="utf-8") as csv_file:
+            reader = csv.DictReader(csv_file)
+            for row in reader:
+                if row["product_page_url"] == infos_to_csv["product_page_url"]:
+                
+                    temp_data.append(infos_to_csv)
+                    entry_exists = True
+                else:
+                    temp_data.append(row)
+
+    if not entry_exists:
+        temp_data.append(infos_to_csv)
+  
+    with open(filename, "w", newline="", encoding="utf-8") as csv_file:
+        writer = csv.DictWriter(csv_file, fieldnames=headers)
+        writer.writeheader()
+        writer.writerows(temp_data)
+
+def create_csv_category(infos_to_csv):
+    directory = "scraped_datas"
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+    category_cleaned = re.sub(r'[\\/*?:"<>|]', "", infos_to_csv["category"])
+    filename = os.path.join(directory, f"data_category_{category_cleaned}.csv")
+
+    headers = ["product_page_url", "universal_product_code", "title", "price_including_tax", "price_excluding_tax", "number_available", "product_description", "category", "review_rating", "image_url"]
+    temp_data = []
+    entry_exists = False
+   
+    if os.path.isfile(filename):
+        with open(filename, "r", newline="", encoding="utf-8") as csv_file:
+            reader = csv.DictReader(csv_file)
+            for row in reader:
+                if row["product_page_url"] == infos_to_csv["product_page_url"]:
+                
+                    temp_data.append(infos_to_csv)
+                    entry_exists = True
+                else:
+                    temp_data.append(row)
+
+    if not entry_exists:
+        temp_data.append(infos_to_csv)
+  
+    with open(filename, "w", newline="", encoding="utf-8") as csv_file:
+        writer = csv.DictWriter(csv_file, fieldnames=headers)
+        writer.writeheader()
+        writer.writerows(temp_data)
+
 def one_category_scraper(url_category):
     urls_books = extract_category_urls_books(url_category)
     for url_book in urls_books:
         info_to_csv = extract_book(url_book)
         print(info_to_csv["title"])
-        create_csv(info_to_csv)
+        create_csv_category(info_to_csv)
 
 def build_one_category_url(category_title):
     url_site_index = "https://books.toscrape.com/index.html"
@@ -277,7 +330,6 @@ def extract_all_site_books_titles_url():
             books_titles_urls = json.load(file)
     except FileNotFoundError:
         books_titles_urls = {} 
-    #books_titles_urls = {}
 
     base_url = "https://books.toscrape.com/"
     page = "index.html"
@@ -299,17 +351,12 @@ def extract_all_site_books_titles_url():
 
         books_titles_urls.update(page_books_titles_urls)
 
-        #for title, href in page_books_titles_urls.items():
-         #   books_titles_urls[title] = href
-        
-
-        # check for other pages 
         next_page = soup.find("li", {"class" : "next"})
         if next_page:
             page_number += 1 
             page = f"/catalogue/page-{page_number}.html"
         else: 
-            break # no more pages 
+            break 
 
     with open('books_titles_urls.json', 'w') as file:
         json.dump(books_titles_urls, file)

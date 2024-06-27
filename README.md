@@ -1,7 +1,8 @@
 # Books To Scrape - Scraper
 
 Le but du projet est de récupérer les informations produit du site books.toscrape.com afin d'effectuer un suivi des prix des produits souhaités.
-il se compose de trois scripts qui permettent de scraper les informations d'un produit, de tout les produits d'une catégorie ou de tout les produits du site, et de charger ces données extraites dans un fichier data_books.csv pour les données textuelles, et dans un dossier books_images pour les images en jpg.
+il se compose de trois scripts qui permettent de scraper les informations d'un produit, de tout les produits d'une catégorie ou de tout les produits du site, et de charger ces données extraites dans des fichiers CSV pour les données textuelles, et dans un dossier books_images pour les images en jpg. 
+Ces données extraites seront stockées dans un dossier nommé scraped_datas se trouvant à la racine du projet. (s'il n'existe pas, ce dossier sera créé à l'execution d'un des scripts de scraping).
 Il contient en outre un fichier json recensant l'ensemble des titres des produits du site ainsi que l'adresse de leur page web. Ce fichier permet au script one_book_scraper.py de trouver efficacement la page d'un produit à partir de son titre.
 
 Pour pouvoir utliser les scripts de scraping, commencez par configurer votre environnement.
