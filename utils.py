@@ -211,7 +211,7 @@ def create_csv_book(infos_to_csv):
     title_cleaned = re.sub(r'[\\/*?:"<>|]', "", infos_to_csv["title"])
     filename = os.path.join(directory, f"data_book_{title_cleaned}.csv")
 
-    headers = ["product_page_url", "universal_ product_code", "title", "price_including_tax", "price_excluding_tax", "number_available", "product_description", "category", "review_rating", "image_url"]
+    headers = ["product_page_url", "universal_product_code", "title", "price_including_tax", "price_excluding_tax", "number_available", "product_description", "category", "review_rating", "image_url"]
     temp_data = []
     entry_exists = False
    
@@ -289,41 +289,26 @@ def build_one_category_url(category_title):
         if category_titles_list[i] == category_title.strip():
             category_index = i + index
     
-    #if category_index == 0 :
-     #   print("Aucune correspondance trouvée.")
-    
     url_category = base_url + category_title.replace(" ","-").lower() + "_" + str(category_index) + url_end
     
     return url_category
 
-def extract_page1_books_titles_urls(soup):
-
+def extract_page_books_titles_urls(soup, page_number):
     page_books_titles_urls = {}
+    base_url = "https://books.toscrape.com/"
 
-    lis = soup.find_all("article", {"class":"product_pod"})
+    lis = soup.find_all("article", {"class": "product_pod"})
     
     for li in lis:
         link = li.find("h3").find("a")
-        title= link.get("title")
-        href = "https://books.toscrape.com/" + link.get("href")
+        title = link.get("title")
+        # Ajustez le préfixe de l'URL basé sur page_number
+        href_prefix = base_url if page_number < 2 else base_url + "catalogue/"
+        href = href_prefix + link.get("href")
         page_books_titles_urls[title] = href
     
     return page_books_titles_urls
 
-def extract_page_books_titles_urls(soup):
-
-    page_books_titles_urls = {}
-
-    lis = soup.find_all("article", {"class":"product_pod"})
-    
-    for li in lis:
-        link = li.find("h3").find("a")
-        title= link.get("title")
-        href = "https://books.toscrape.com/catalogue/" + link.get("href")
-        page_books_titles_urls[title] = href
-    
-    return page_books_titles_urls
-    
 def extract_all_site_books_titles_url():
     try:
         with open('books_titles_urls.json', 'r') as file:
@@ -342,21 +327,17 @@ def extract_all_site_books_titles_url():
         response.encoding = "utf-8"
         soup = BeautifulSoup(response.text, "html.parser")
 
-        print (page_number)
+        print(page_number)
 
-        if page_number < 2: 
-            page_books_titles_urls = extract_page1_books_titles_urls(soup)
-        else : 
-            page_books_titles_urls = extract_page_books_titles_urls(soup)
-
+        page_books_titles_urls = extract_page_books_titles_urls(soup, page_number)
         books_titles_urls.update(page_books_titles_urls)
 
-        next_page = soup.find("li", {"class" : "next"})
+        next_page = soup.find("li", {"class": "next"})
         if next_page:
-            page_number += 1 
+            page_number += 1
             page = f"/catalogue/page-{page_number}.html"
-        else: 
-            break 
+        else:
+            break
 
     with open('books_titles_urls.json', 'w') as file:
         json.dump(books_titles_urls, file)
@@ -383,7 +364,7 @@ def find_url_book(title_input):
         return url_book
     
     print("Aucune correspondance trouvée, mise à jour des données...")
-    books_titles_urls = extract_all_site_books_titles_url()  # Mise à jour
+    books_titles_urls = extract_all_site_books_titles_url()  
     url_book = search_title_match(books_titles_urls)
 
     if url_book:
