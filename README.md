@@ -74,21 +74,25 @@ Ensuite utilisez la commande suivante en remplacant nom_du_script.py par le nom 
 
 soit 
 
-```python one_book_scraper.py``` ou
+        python one_book_scraper.py 
+ou
 
-```python one_category_scraper.py``` ou
+        python one_category_scraper.py
+ou
 
-```python all_site_scraper.py```
+        python all_site_scraper.py
 
 - Sur macOS et Linux : `python3 nom_du_script.py`
 
 soit
 
-```python3 one_book_scraper.py``` ou
+        python3 one_book_scraper.py
+ou
 
-```python3 one_category_scraper.py``` ou
+        python3 one_category_scraper.py
+ou
 
-```python3 all_site_scraper.py```
+        python3 all_site_scraper.py
 
 
 Notez qu'a l'execution des script `one_book_scraper.py` et `one_category_scraper.py` il vous sera demandé d'inserer le titre d'un ouvrage ou le nom d'une categorie. Entrez le titre/nom complet. préferez un copier coller pour eviter tout risque d'erreur.

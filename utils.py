@@ -190,25 +190,13 @@ def extract_urls_categories(url_site_index):
     
     return urls_categories
 
-def create_csv(infos_to_csv): 
-    headers = ["product_page_url", "universal_ product_code", "title", "price_including_tax", "price_excluding_tax", "number_available", "product_description", "category", "review_rating", "image_url"]
-    file_exists = os.path.isfile("datas_books.csv") 
-    if not file_exists: 
-        with open("datas_books.csv", "w", newline="", encoding="utf-8") as csv_file:
-            writer = csv.DictWriter(csv_file, fieldnames=headers)        
-            writer.writeheader()
-            writer.writerow(infos_to_csv)
-    else : 
-        with open("datas_books.csv", "a", newline="", encoding="utf-8") as csv_file:
-            writer = csv.DictWriter(csv_file, fieldnames=headers)        
-            writer.writerow(infos_to_csv)
 
 def create_csv_book(infos_to_csv):
     directory = "scraped_datas"
     if not os.path.exists(directory):
         os.makedirs(directory)
 
-    title_cleaned = re.sub(r'[\\/*?:"<>|]', "", infos_to_csv["title"])
+    title_cleaned = re.sub(r'[\\/*?:"<>|]', "", infos_to_csv["title"])[:50]
     filename = os.path.join(directory, f"data_book_{title_cleaned}.csv")
 
     headers = ["product_page_url", "universal_product_code", "title", "price_including_tax", "price_excluding_tax", "number_available", "product_description", "category", "review_rating", "image_url"]
@@ -311,7 +299,7 @@ def extract_page_books_titles_urls(soup, page_number):
 
 def extract_all_site_books_titles_url():
     try:
-        with open('books_titles_urls.json', 'r') as file:
+        with open('books_titles_urls.json', 'r', encoding='utf-8') as file:
             books_titles_urls = json.load(file)
     except FileNotFoundError:
         books_titles_urls = {} 
@@ -327,7 +315,7 @@ def extract_all_site_books_titles_url():
         response.encoding = "utf-8"
         soup = BeautifulSoup(response.text, "html.parser")
 
-        print(page_number)
+        print(f"Page {page_number}")
 
         page_books_titles_urls = extract_page_books_titles_urls(soup, page_number)
         books_titles_urls.update(page_books_titles_urls)
@@ -339,14 +327,14 @@ def extract_all_site_books_titles_url():
         else:
             break
 
-    with open('books_titles_urls.json', 'w') as file:
-        json.dump(books_titles_urls, file)
+    with open('books_titles_urls.json', 'w', encoding='utf-8') as file:
+        json.dump(books_titles_urls, file, ensure_ascii=False)
 
     return books_titles_urls 
 
 def find_url_book(title_input):
     try:
-        with open('books_titles_urls.json', 'r') as file:
+        with open('books_titles_urls.json', 'r', encoding='utf-8') as file:
             books_titles_urls = json.load(file)
     except FileNotFoundError:
         print("Le fichier books_titles_urls.json n'existe pas.")
